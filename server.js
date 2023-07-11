@@ -56,21 +56,36 @@ class SocketServer{
                     }
                     else{
                         socket.join(roomId);
+                        socket.emit('joined_room' , roomId ) ; 
                         console.log('andar' , socket.id , this.io.sockets.adapter.rooms.get(roomId).size ) ; 
                         if( this.io.sockets.adapter.rooms.get(roomId).size === 2 ){
                             console.log(`4 users joined in a ${roomId}`) ; 
                             console.log('start');
 
-                            this.roomData[roomId] = this.getDefaultPosition() ; 
+                            
+                            const data = {
+                                userTurn : 0 
+                                , 
+                                dice :
+                                {
+                                    dicePosition : { x : 0 , y : 1 , z : 0 } , 
+                                    diceQuaternion : { x : 0 , y : 0 , z : 0 , w : 0 } , 
+                                }
+                                ,
+                                tokenPosition : this.getDefaultPosition() , 
+                            }
 
-                            console.log(this.roomData[roomId]) ; 
-
-
-
-
+                            this.roomData[roomId] = data ; 
+                            
+                            // console.log(this.roomData[roomId]) ; 
                         }
                     }
                 }
+            })
+
+            socket.on('dice_data' , ( data )=>{
+                console.log(data) ; //data.room
+                socket.broadcast.to(data.room).emit('dice_update' , data ) ; 
             })
         })
 
